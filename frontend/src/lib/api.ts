@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  Spring Boot API Client
-//  All email operations go through the backend — no Supabase direct calls.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080/api";
@@ -10,11 +9,14 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: { "Content-Type": "application/json", ...init.headers },
     ...init,
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error((err as any).error ?? "API error");
   }
+
   if (res.status === 204) return undefined as T;
+
   return res.json();
 }
 
@@ -36,7 +38,7 @@ export interface EmailDTO {
 }
 
 export interface SendPayload {
-  to: string;         // comma-separated
+  to: string;
   subject: string;
   body: string;
   senderName?: string;
@@ -45,19 +47,29 @@ export interface SendPayload {
 // ── API ───────────────────────────────────────────────────────────────────────
 
 export const emailApi = {
-  getAll:       ()             => req<EmailDTO[]>("/emails"),
-  getByStatus:  (s: string)   => req<EmailDTO[]>(`/emails?status=${s}`),
-  getStarred:   ()             => req<EmailDTO[]>("/emails?starred=true"),
-  search:       (q: string)   => req<EmailDTO[]>(`/emails?search=${encodeURIComponent(q)}`),
-  getById:      (id: string)  => req<EmailDTO>(`/emails/${id}`),
-  unreadCount:  ()             => req<{ count: number }>("/emails/unread-count"),
+  getAll: () => req<EmailDTO[]>("/emails"),
+  getByStatus: (s: string) => req<EmailDTO[]>(`/emails?status=${s}`),
+  getStarred: () => req<EmailDTO[]>("/emails?starred=true"),
+  search: (q: string) =>
+    req<EmailDTO[]>(`/emails?search=${encodeURIComponent(q)}`),
+  getById: (id: string) => req<EmailDTO>(`/emails/${id}`),
+  unreadCount: () => req<{ count: number }>("/emails/unread-count"),
 
-  /** Sends a real email via Spring Boot → JavaMailSender → SMTP */
   send: (payload: SendPayload) =>
-    req<EmailDTO>("/emails/send", { method: "POST", body: JSON.stringify(payload) }),
+    req<EmailDTO>("/emails/send", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
-  markRead:    (id: string) => req<EmailDTO>(`/emails/${id}/read`,  { method: "PATCH" }),
-  toggleStar:  (id: string) => req<EmailDTO>(`/emails/${id}/star`,  { method: "PATCH" }),
-  trash:       (id: string) => req<EmailDTO>(`/emails/${id}/trash`, { method: "PATCH" }),
-  delete:      (id: string) => req<void>(`/emails/${id}`,           { method: "DELETE" }),
+  markRead: (id: string) =>
+    req<EmailDTO>(`/emails/${id}/read`, { method: "PATCH" }),
+
+  toggleStar: (id: string) =>
+    req<EmailDTO>(`/emails/${id}/star`, { method: "PATCH" }),
+
+  trash: (id: string) =>
+    req<EmailDTO>(`/emails/${id}/trash`, { method: "PATCH" }),
+
+  delete: (id: string) =>
+    req<void>(`/emails/${id}`, { method: "DELETE" }),
 };
