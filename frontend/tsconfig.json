@@ -2,9 +2,17 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
+
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
+
     "skipLibCheck": true,
+
+    /* 🔥 IMPORTANT FIX */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
 
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
