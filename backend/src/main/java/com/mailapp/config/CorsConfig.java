@@ -15,11 +15,10 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // ✅ VERY IMPORTANT (your frontend URL)
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://email-generation-system-bck9-r0vbmvd4u-sas-projects-de530146.vercel.app"
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",
+            "https://*.vercel.app"
         ));
-
         // ✅ Required
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
