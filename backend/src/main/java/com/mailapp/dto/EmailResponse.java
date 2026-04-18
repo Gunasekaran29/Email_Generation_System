@@ -1,14 +1,12 @@
 package com.mailapp.dto;
 
 import com.mailapp.model.Email;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Builder
 public class EmailResponse {
 
     private String id;
@@ -19,25 +17,25 @@ public class EmailResponse {
     private String body;
     private String preview;
     private String status;
-    private boolean read;
-    private boolean starred;
+    private boolean isRead;
+    private boolean isStarred;
     private String avatar;
     private LocalDateTime createdAt;
 
     public static EmailResponse from(Email e) {
-        return EmailResponse.builder()
-                .id(e.getId())
-                .sender(e.getSender())
-                .senderEmail(e.getSenderEmail())
-                .recipients(e.getRecipients())
-                .subject(e.getSubject())
-                .body(e.getBody())
-                .preview(e.getPreview())
-                .status(e.getStatus())
-                .read(e.isRead())
-                .starred(e.isStarred())
-                .avatar(e.getAvatar())
-                .createdAt(e.getCreatedAt())
-                .build();
+        EmailResponse r = new EmailResponse();
+        r.setId(e.getId());
+        r.setSender(e.getSender());
+        r.setSenderEmail(e.getSenderEmail());
+        r.setRecipients(e.getRecipients());
+        r.setSubject(e.getSubject());
+        r.setBody(e.getBody());
+        r.setPreview(e.getPreview());
+        r.setStatus(e.getStatus());
+        r.setRead(e.isRead());
+        r.setStarred(e.isStarred());
+        r.setAvatar(e.getAvatar() != null ? e.getAvatar() : "");
+        r.setCreatedAt(e.getCreatedAt());
+        return r;
     }
 }

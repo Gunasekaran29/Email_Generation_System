@@ -9,3 +9,4 @@ public class SendEmailRequest {
     private String body;
     private String senderName;
 }
+
