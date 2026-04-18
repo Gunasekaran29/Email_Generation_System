@@ -1,5 +1,6 @@
-package com.mailapp.model;
+package com.mailapp.repository;
 
+import com.mailapp.model.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
