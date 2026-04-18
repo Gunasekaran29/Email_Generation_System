@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 public class MailappApplication {
+
     public static void main(String[] args) {
+        System.out.println("🔥 APP STARTING...");
         SpringApplication.run(MailappApplication.class, args);
     }
 }
-
 @RestController
 class RootController {
 
@@ -22,11 +23,3 @@ class RootController {
     }
 }
 
-@SpringBootApplication
-public class MailappApplication {
-
-    public static void main(String[] args) {
-        System.out.println("🔥 APP STARTING...");
-        SpringApplication.run(MailappApplication.class, args);
-    }
-}
