@@ -33,7 +33,6 @@ public class Email {
     private String status;
 
     private boolean isRead;
-
     private boolean isStarred;
 
     private String avatar;
