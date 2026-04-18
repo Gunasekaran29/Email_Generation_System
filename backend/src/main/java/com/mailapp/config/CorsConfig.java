@@ -14,14 +14,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                                "http://localhost:5173",
-                                "http://localhost:3000",
-                                "https://email-generation-system-bck9.vercel.app"
-                        )
+                        .allowedOrigins("*")
                         .allowedMethods("*")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedHeaders("*");
             }
         };
     }

@@ -12,28 +12,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST API — base: http://localhost:8080/api/emails
- *
- *  GET    /api/emails                 all emails
- *  GET    /api/emails?status=inbox    filter inbox|sent|trash
- *  GET    /api/emails?starred=true    starred
- *  GET    /api/emails?search=foo      search
- *  GET    /api/emails/unread-count    badge number
- *  GET    /api/emails/{id}            single email
- *  POST   /api/emails/send            ← sends real SMTP email
- *  PATCH  /api/emails/{id}/read       mark read
- *  PATCH  /api/emails/{id}/star       toggle star
- *  PATCH  /api/emails/{id}/trash      move to trash
- *  DELETE /api/emails/{id}            permanent delete
- */
 @RestController
 @RequestMapping("/api/emails")
+@CrossOrigin(origins = "*") // ✅ FORCE CORS FIX
 @RequiredArgsConstructor
 @Slf4j
 public class EmailController {
 
     private final EmailService svc;
+
+    // ✅ TEST API (important)
+    @GetMapping("/test")
+    public String test() {
+        return "OK";
+    }
 
     @GetMapping
     public ResponseEntity<List<EmailResponse>> list(
@@ -61,7 +53,6 @@ public class EmailController {
     public ResponseEntity<?> send(@Valid @RequestBody SendEmailRequest req) {
         try {
             EmailResponse sent = svc.send(req);
-            log.info("Sent: '{}' → {}", req.getSubject(), req.getTo());
             return ResponseEntity.ok(sent);
         } catch (Exception ex) {
             log.error("Send failed: {}", ex.getMessage(), ex);
