@@ -21,3 +21,12 @@ class RootController {
         return "RUNNING";
     }
 }
+
+@SpringBootApplication
+public class MailappApplication {
+
+    public static void main(String[] args) {
+        System.out.println("🔥 APP STARTING...");
+        SpringApplication.run(MailappApplication.class, args);
+    }
+}
