@@ -6,7 +6,7 @@
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.2.5</version>
   </parent>
-
+  
   <groupId>com.mailapp</groupId>
   <artifactId>mailapp-backend</artifactId>
   <version>1.0.0</version>
