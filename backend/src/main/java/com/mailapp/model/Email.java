@@ -6,12 +6,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Email {
 
     @Id
@@ -26,11 +25,10 @@ public class Email {
 
     private String subject;
 
-    @Column(length = 10000)
+    @Column(columnDefinition = "TEXT")
     private String body;
 
     private String preview;
-
     private String status;
 
     private boolean isRead;
