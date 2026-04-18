@@ -1,13 +1,33 @@
-CorsConfiguration config = new CorsConfiguration();
+package com.mailapp.config;
 
-config.setAllowedOriginPatterns(List.of(
-        "http://localhost:5173",
-        "https://*.vercel.app"
-));
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
-config.setAllowedMethods(List.of(
-        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-));
+import java.util.List;
 
-config.setAllowedHeaders(List.of("*"));
-config.setAllowCredentials(true);
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://email-generation-system-bck9.vercel.app"
+        ));
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
+    }
+}
