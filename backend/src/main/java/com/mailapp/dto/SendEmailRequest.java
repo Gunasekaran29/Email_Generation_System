@@ -1,14 +1,11 @@
 package com.mailapp.dto;
 
-import lombok.*;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class SendEmailRequest {
-
     private String to;
     private String subject;
     private String body;
+    private String senderName;
 }

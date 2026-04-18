@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Email {
 
     @Id
@@ -19,20 +19,24 @@ public class Email {
 
     private String sender;
     private String senderEmail;
-    private String recipients;
+
+    @ElementCollection
+    private List<String> recipients;
 
     private String subject;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 10000)
     private String body;
 
     private String preview;
+
     private String status;
 
     private boolean isRead;
+
     private boolean isStarred;
 
     private String avatar;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
