@@ -2,7 +2,7 @@
 //  Spring Boot API Client
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080/api";
+const BASE = "https://emailgenerationsystem-production.up.railway.app";
 
 async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
