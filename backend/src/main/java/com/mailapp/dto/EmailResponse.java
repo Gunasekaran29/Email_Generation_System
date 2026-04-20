@@ -1,23 +1,26 @@
 package com.mailapp.dto;
 
 import com.mailapp.model.Email;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class EmailResponse {
 
-    public String id;
-    public String sender;
-    public String senderEmail;
-    public List<String> recipients;
-    public String subject;
-    public String body;
-    public String preview;
-    public String status;
-    public boolean read;
-    public boolean starred;
-    public String avatar;
-    public LocalDateTime createdAt;
+    private String id;
+    private String sender;
+    private String senderEmail;
+    private List<String> recipients;
+    private String subject;
+    private String body;
+    private String preview;
+    private String status;
+    private boolean isRead;
+    private boolean isStarred;
+    private String avatar;
+    private LocalDateTime createdAt;
 
     public static EmailResponse from(Email e) {
         EmailResponse r = new EmailResponse();
@@ -29,8 +32,8 @@ public class EmailResponse {
         r.body = e.getBody();
         r.preview = e.getPreview();
         r.status = e.getStatus();
-        r.read = e.isRead();
-        r.starred = e.isStarred();
+        r.isRead = e.isRead();
+        r.isStarred = e.isStarred();
         r.avatar = e.getAvatar();
         r.createdAt = e.getCreatedAt();
         return r;

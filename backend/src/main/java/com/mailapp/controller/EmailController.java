@@ -1,8 +1,10 @@
 package com.mailapp.controller;
 
-import com.mailapp.dto.*;
+import com.mailapp.dto.EmailResponse;
+import com.mailapp.dto.SendEmailRequest;
 import com.mailapp.service.EmailService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -22,12 +24,7 @@ public class EmailController {
     }
 
     @PostMapping("/send")
-    public EmailResponse send(@RequestBody SendEmailRequest req) {
+    public EmailResponse send(@RequestBody SendEmailRequest req) throws Exception {
         return svc.send(req);
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "OK";
     }
 }

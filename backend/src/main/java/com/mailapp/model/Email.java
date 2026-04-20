@@ -1,10 +1,16 @@
 package com.mailapp.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Email {
 
     @Id
@@ -24,35 +30,9 @@ public class Email {
 
     private String preview;
     private String status;
-
-    private boolean read;
-    private boolean starred;
-
+    private boolean isRead;
+    private boolean isStarred;
     private String avatar;
 
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    // getters & setters (IMPORTANT)
-    public String getId() { return id; }
-    public String getSender() { return sender; }
-    public void setSender(String sender) { this.sender = sender; }
-    public String getSenderEmail() { return senderEmail; }
-    public void setSenderEmail(String senderEmail) { this.senderEmail = senderEmail; }
-    public List<String> getRecipients() { return recipients; }
-    public void setRecipients(List<String> recipients) { this.recipients = recipients; }
-    public String getSubject() { return subject; }
-    public void setSubject(String subject) { this.subject = subject; }
-    public String getBody() { return body; }
-    public void setBody(String body) { this.body = body; }
-    public String getPreview() { return preview; }
-    public void setPreview(String preview) { this.preview = preview; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public boolean isRead() { return read; }
-    public void setRead(boolean read) { this.read = read; }
-    public boolean isStarred() { return starred; }
-    public void setStarred(boolean starred) { this.starred = starred; }
-    public String getAvatar() { return avatar; }
-    public void setAvatar(String avatar) { this.avatar = avatar; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
 }
