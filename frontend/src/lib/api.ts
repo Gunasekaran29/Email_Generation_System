@@ -2,7 +2,7 @@
 //  Spring Boot API Client
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BASE = "https://emailgenerationsystem-production.up.railway.app";
+const BASE = "https://emailgenerationsystem-production.up.railway.app/api";
 
 async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
