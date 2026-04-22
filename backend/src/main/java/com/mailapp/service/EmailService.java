@@ -2,31 +2,32 @@ package com.mailapp.service;
 
 import com.mailapp.dto.EmailResponse;
 import com.mailapp.dto.SendEmailRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
+    private final List<EmailResponse> emails = new ArrayList<>();
+
     public List<EmailResponse> getAll() {
-        return new ArrayList<>();
+        return emails;
     }
 
     public List<EmailResponse> getByStatus(String status) {
-        return new ArrayList<>();
+        return emails;
     }
 
     public EmailResponse send(SendEmailRequest req) {
 
         EmailResponse res = new EmailResponse();
-        res.setId("1");
+        res.setId(UUID.randomUUID().toString());
+        res.setSender("Me");
         res.setSubject(req.getSubject());
         res.setBody(req.getBody());
-        res.setSender("Me");
+
+        emails.add(res); // 🔥 SAVE HERE
 
         return res;
     }
