@@ -2,6 +2,10 @@ package com.mailapp.service;
 
 import com.mailapp.dto.EmailResponse;
 import com.mailapp.dto.SendEmailRequest;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -9,9 +13,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
-    // 🔥 in-memory storage
+    private final JavaMailSender mailSender;
+
+    // 🔥 In-memory storage (temporary)
     private final List<EmailResponse> emails = new ArrayList<>();
 
     // ─────────────────────────────
@@ -31,30 +38,61 @@ public class EmailService {
     }
 
     // ─────────────────────────────
-    // SEND EMAIL
+    // SEND EMAIL (REAL SMTP)
     // ─────────────────────────────
     public EmailResponse send(SendEmailRequest req) {
 
+        // ✅ VALIDATE INPUT
+        if (req.getTo() == null || req.getTo().isBlank()) {
+            throw new RuntimeException("Recipient email is required");
+        }
+
+        // ✅ PREPARE RECIPIENTS
+        String[] recipients = Arrays.stream(req.getTo().split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+
+        // 🔥 SEND REAL EMAIL (BREVO)
+        try {
+            MimeMessage msg = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+
+            // ⚠️ MUST MATCH BREVO VERIFIED SENDER
+            helper.setFrom("santhosh <gsanthosh5910@gmail.com>");
+
+            helper.setTo(recipients);
+            helper.setSubject(
+                    req.getSubject() != null ? req.getSubject() : "(No Subject)"
+            );
+
+            helper.setText(
+                    req.getBody() != null ? req.getBody() : "",
+                    true
+            );
+
+            mailSender.send(msg);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("SMTP failed: " + e.getMessage());
+        }
+
+        // ✅ STORE IN MEMORY (for UI)
         EmailResponse res = new EmailResponse();
 
         res.setId(UUID.randomUUID().toString());
         res.setSender("Me");
-        res.setSenderEmail("me@mail.com");
+        res.setSenderEmail("gsanthosh5910@gmail.com");
 
-        // ✅ SAFE recipients (fix join error)
-        List<String> recipients = new ArrayList<>();
-        if (req.getTo() != null && !req.getTo().isBlank()) {
-            recipients = Arrays.stream(req.getTo().split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toList());
-        }
-        res.setRecipients(recipients);
+        List<String> recipientList = Arrays.stream(recipients)
+                .collect(Collectors.toList());
+
+        res.setRecipients(recipientList);
 
         res.setSubject(req.getSubject());
         res.setBody(req.getBody());
 
-        // preview
         String body = req.getBody() != null ? req.getBody() : "";
         res.setPreview(body.substring(0, Math.min(50, body.length())));
 
@@ -64,7 +102,7 @@ public class EmailService {
         res.setAvatar("");
         res.setCreatedAt(LocalDateTime.now().toString());
 
-        emails.add(res); // 🔥 store
+        emails.add(res);
 
         return res;
     }
