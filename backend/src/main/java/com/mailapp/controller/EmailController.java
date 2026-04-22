@@ -31,7 +31,20 @@ public class EmailController {
         if (status != null) return ResponseEntity.ok(svc.getByStatus(status));
         return ResponseEntity.ok(svc.getAll());
     }
+    @PatchMapping("/{id}/read")
+public ResponseEntity<EmailResponse> markRead(@PathVariable String id) {
+    return ResponseEntity.ok(svc.markRead(id));
+}
 
+@PatchMapping("/{id}/star")
+public ResponseEntity<EmailResponse> toggleStar(@PathVariable String id) {
+    return ResponseEntity.ok(svc.toggleStar(id));
+}
+
+@PatchMapping("/{id}/trash")
+public ResponseEntity<EmailResponse> trash(@PathVariable String id) {
+    return ResponseEntity.ok(svc.trash(id));
+}
     @PostMapping("/send")
     public ResponseEntity<?> send(@Valid @RequestBody SendEmailRequest req) {
         try {
