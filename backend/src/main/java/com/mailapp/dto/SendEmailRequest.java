@@ -7,5 +7,4 @@ public class SendEmailRequest {
     private String to;
     private String subject;
     private String body;
-    private String senderName;
 }

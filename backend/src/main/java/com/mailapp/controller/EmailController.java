@@ -3,28 +3,48 @@ package com.mailapp.controller;
 import com.mailapp.dto.EmailResponse;
 import com.mailapp.dto.SendEmailRequest;
 import com.mailapp.service.EmailService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/emails")
-@CrossOrigin("*")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*") // backup safety
 public class EmailController {
 
     private final EmailService svc;
 
-    public EmailController(EmailService svc) {
-        this.svc = svc;
+    @GetMapping("/test")
+    public String test() {
+        return "OK";
     }
 
     @GetMapping
-    public List<EmailResponse> getAll() {
-        return svc.getAll();
+    public ResponseEntity<List<EmailResponse>> list(
+            @RequestParam(required = false) String status) {
+
+        if (status != null) return ResponseEntity.ok(svc.getByStatus(status));
+        return ResponseEntity.ok(svc.getAll());
     }
 
     @PostMapping("/send")
-    public EmailResponse send(@RequestBody SendEmailRequest req) throws Exception {
-        return svc.send(req);
+    public ResponseEntity<?> send(@Valid @RequestBody SendEmailRequest req) {
+        try {
+            return ResponseEntity.ok(svc.send(req));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    // ⭐ IMPORTANT — FIXES PREFLIGHT
+    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleOptions() {
+        return ResponseEntity.ok().build();
     }
 }
