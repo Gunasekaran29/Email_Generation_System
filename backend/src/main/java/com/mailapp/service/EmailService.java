@@ -59,7 +59,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(msg, true);
 
             // ⚠️ MUST MATCH BREVO VERIFIED SENDER
-            helper.setFrom("santhosh <gsanthosh5910@gmail.com>");
+            helper.setFrom("gsanthosh5910@gmail.com");
 
             helper.setTo(recipients);
             helper.setSubject(
