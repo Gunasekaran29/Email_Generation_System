@@ -47,7 +47,7 @@ public class EmailService {
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 
 sender.setHost("smtp-relay.brevo.com");
-sender.setPort(587);
+sender.setPort(2525);
 sender.setUsername(System.getenv("SPRING_MAIL_USERNAME"));
 sender.setPassword(System.getenv("SPRING_MAIL_PASSWORD"));
 
