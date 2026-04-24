@@ -45,15 +45,15 @@ public ResponseEntity<EmailResponse> toggleStar(@PathVariable String id) {
 public ResponseEntity<EmailResponse> trash(@PathVariable String id) {
     return ResponseEntity.ok(svc.trash(id));
 }
-    @PostMapping("/send")
+@PostMapping("/send")
 public ResponseEntity<?> send(@RequestBody SendEmailRequest req) {
     try {
         return ResponseEntity.ok(svc.send(req));
     } catch (Exception e) {
-        e.printStackTrace(); // still logs internally
+        e.printStackTrace();
 
         return ResponseEntity.status(500)
-                .body(Map.of("error", e.getMessage())); // 👈 SEND ERROR TO UI
+                .body(Map.of("error", e.getMessage())); // 👈 show actual error
     }
 }
 
