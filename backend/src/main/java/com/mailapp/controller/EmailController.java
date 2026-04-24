@@ -46,14 +46,16 @@ public ResponseEntity<EmailResponse> trash(@PathVariable String id) {
     return ResponseEntity.ok(svc.trash(id));
 }
     @PostMapping("/send")
-    public ResponseEntity<?> send(@Valid @RequestBody SendEmailRequest req) {
-        try {
-            return ResponseEntity.ok(svc.send(req));
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", ex.getMessage()));
-        }
+public ResponseEntity<?> send(@RequestBody SendEmailRequest req) {
+    try {
+        return ResponseEntity.ok(svc.send(req));
+    } catch (Exception e) {
+        e.printStackTrace(); // still logs internally
+
+        return ResponseEntity.status(500)
+                .body(Map.of("error", e.getMessage())); // 👈 SEND ERROR TO UI
     }
+}
 
     // ⭐ IMPORTANT — FIXES PREFLIGHT
     @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
