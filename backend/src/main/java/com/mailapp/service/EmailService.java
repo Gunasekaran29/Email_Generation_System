@@ -17,16 +17,25 @@ public class EmailService {
 
     private final List<EmailResponse> emails = new ArrayList<>();
 
+    // ─────────────────────────────
+    // GET ALL
+    // ─────────────────────────────
     public List<EmailResponse> getAll() {
         return emails;
     }
 
+    // ─────────────────────────────
+    // FILTER BY STATUS
+    // ─────────────────────────────
     public List<EmailResponse> getByStatus(String status) {
         return emails.stream()
                 .filter(e -> status.equalsIgnoreCase(e.getStatus()))
                 .collect(Collectors.toList());
     }
 
+    // ─────────────────────────────
+    // SEND EMAIL (BREVO API)
+    // ─────────────────────────────
     public EmailResponse send(SendEmailRequest req) {
 
         if (req.getTo() == null || req.getTo().isBlank()) {
@@ -36,7 +45,10 @@ public class EmailService {
         try {
             String json = String.format("""
             {
-              "sender": {"email": "gsanthosh5910@gmail.com"},
+              "sender": {
+                "email": "gsanthosh5910@gmail.com",
+                "name": "Santhosh"
+              },
               "to": [{"email": "%s"}],
               "subject": "%s",
               "htmlContent": "%s"
@@ -68,36 +80,64 @@ public class EmailService {
             throw new RuntimeException("Email send failed: " + e.getMessage());
         }
 
-        // UI storage
-        EmailResponse res = new EmailResponse();
+        // ─────────────────────────────
+        // STORE IN SENT
+        // ─────────────────────────────
+        EmailResponse sentMail = new EmailResponse();
 
-        res.setId(UUID.randomUUID().toString());
-        res.setSender("Me");
-        res.setSenderEmail("gsanthosh5910@gmail.com");
+        sentMail.setId(UUID.randomUUID().toString());
+        sentMail.setSender("Me");
+        sentMail.setSenderEmail("gsanthosh5910@gmail.com");
 
         List<String> recipients = Arrays.stream(req.getTo().split(","))
                 .map(String::trim)
                 .collect(Collectors.toList());
 
-        res.setRecipients(recipients);
-
-        res.setSubject(req.getSubject());
-        res.setBody(req.getBody());
+        sentMail.setRecipients(recipients);
+        sentMail.setSubject(req.getSubject());
+        sentMail.setBody(req.getBody());
 
         String body = req.getBody() != null ? req.getBody() : "";
-        res.setPreview(body.substring(0, Math.min(50, body.length())));
+        sentMail.setPreview(body.substring(0, Math.min(50, body.length())));
 
-        res.setStatus("sent");
-        res.setRead(true);
-        res.setStarred(false);
-        res.setAvatar("");
-        res.setCreatedAt(LocalDateTime.now().toString());
+        sentMail.setStatus("sent");
+        sentMail.setRead(true);
+        sentMail.setStarred(false);
+        sentMail.setAvatar("");
+        sentMail.setCreatedAt(LocalDateTime.now().toString());
 
-        emails.add(res);
+        // ─────────────────────────────
+        // STORE IN INBOX (SIMULATION)
+        // ─────────────────────────────
+        EmailResponse inboxMail = new EmailResponse();
 
-        return res;
+        inboxMail.setId(UUID.randomUUID().toString());
+        inboxMail.setSender(req.getTo());
+        inboxMail.setSenderEmail(req.getTo());
+        inboxMail.setRecipients(List.of("me"));
+        inboxMail.setSubject(req.getSubject());
+        inboxMail.setBody(req.getBody());
+
+        inboxMail.setPreview(body.substring(0, Math.min(50, body.length())));
+
+        inboxMail.setStatus("inbox");
+        inboxMail.setRead(false);
+        inboxMail.setStarred(false);
+        inboxMail.setAvatar("");
+        inboxMail.setCreatedAt(LocalDateTime.now().toString());
+
+        // ─────────────────────────────
+        // SAVE BOTH
+        // ─────────────────────────────
+        emails.add(sentMail);
+        emails.add(inboxMail);
+
+        return sentMail;
     }
 
+    // ─────────────────────────────
+    // MARK AS READ
+    // ─────────────────────────────
     public EmailResponse markRead(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -108,6 +148,9 @@ public class EmailService {
         return null;
     }
 
+    // ─────────────────────────────
+    // TOGGLE STAR
+    // ─────────────────────────────
     public EmailResponse toggleStar(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -118,6 +161,9 @@ public class EmailService {
         return null;
     }
 
+    // ─────────────────────────────
+    // MOVE TO TRASH
+    // ─────────────────────────────
     public EmailResponse trash(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -128,6 +174,9 @@ public class EmailService {
         return null;
     }
 
+    // ─────────────────────────────
+    // DELETE
+    // ─────────────────────────────
     public void delete(String id) {
         emails.removeIf(e -> e.getId().equals(id));
     }
