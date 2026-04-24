@@ -2,45 +2,31 @@ package com.mailapp.service;
 
 import com.mailapp.dto.EmailResponse;
 import com.mailapp.dto.SendEmailRequest;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmailService {
 
-    // 🔥 TEMP in-memory storage
     private final List<EmailResponse> emails = new ArrayList<>();
 
-    // ─────────────────────────────
-    // GET ALL
-    // ─────────────────────────────
     public List<EmailResponse> getAll() {
         return emails;
     }
 
-    // ─────────────────────────────
-    // FILTER BY STATUS
-    // ─────────────────────────────
     public List<EmailResponse> getByStatus(String status) {
         return emails.stream()
                 .filter(e -> status.equalsIgnoreCase(e.getStatus()))
                 .collect(Collectors.toList());
     }
 
-    // ─────────────────────────────
-    // SEND EMAIL (FORCED BREVO)
-    // ─────────────────────────────
     public EmailResponse send(SendEmailRequest req) {
 
         if (req.getTo() == null || req.getTo().isBlank()) {
@@ -48,83 +34,52 @@ public class EmailService {
         }
 
         try {
-            // 🔥 FORCE BREVO SMTP (bypass config issues)
-JavaMailSenderImpl sender = new JavaMailSenderImpl();
+            String json = String.format("""
+            {
+              "sender": {"email": "gsanthosh5910@gmail.com"},
+              "to": [{"email": "%s"}],
+              "subject": "%s",
+              "htmlContent": "%s"
+            }
+            """,
+            req.getTo(),
+            req.getSubject() != null ? req.getSubject() : "No Subject",
+            req.getBody() != null ? req.getBody() : ""
+            );
 
-sender.setHost("smtp-relay.brevo.com");
-sender.setPort(2525);
-sender.setUsername(System.getenv("SPRING_MAIL_USERNAME"));
-sender.setPassword(System.getenv("SPRING_MAIL_PASSWORD"));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("accept", "application/json")
+                    .header("api-key", System.getenv("BREVO_API_KEY"))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
 
-Properties props = sender.getJavaMailProperties();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
 
-props.put("mail.transport.protocol", "smtp");
-props.put("mail.smtp.auth", "true");
-props.put("mail.smtp.starttls.enable", "true");
-props.put("mail.smtp.starttls.required", "true");
-props.put("mail.smtp.connectiontimeout", "5000");
-props.put("mail.smtp.timeout", "5000");
-props.put("mail.smtp.writetimeout", "5000");
-
-MimeMessage msg = sender.createMimeMessage();
-MimeMessageHelper helper = new MimeMessageHelper(msg);
-
-helper.setFrom("gsanthosh5910@gmail.com");
-helper.setTo(req.getTo().split(","));
-helper.setSubject(req.getSubject());
-helper.setText(req.getBody());
-
-sender.send(msg);
+            if (response.statusCode() >= 400) {
+                throw new RuntimeException("Brevo API failed: " + response.body());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("SMTP failed: " + e.getMessage());
-        }try {
-    String json = """
-    {
-      "sender": {"email": "gsanthosh5910@gmail.com"},
-      "to": [{"email": "%s"}],
-      "subject": "%s",
-      "htmlContent": "%s"
-    }
-    """.formatted(
-            req.getTo(),
-            req.getSubject(),
-            req.getBody()
-    );
+            throw new RuntimeException("Email send failed: " + e.getMessage());
+        }
 
-    HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
-            .header("accept", "application/json")
-            .header("api-key", System.getenv("BREVO_API_KEY"))
-            .header("content-type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(json))
-            .build();
-
-    HttpClient client = HttpClient.newHttpClient();
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-    if (response.statusCode() >= 400) {
-        throw new RuntimeException("Brevo API failed: " + response.body());
-    }
-
-} catch (Exception e) {
-    e.printStackTrace();
-    throw new RuntimeException("Email send failed: " + e.getMessage());
-}
-
-        // ✅ STORE FOR UI
+        // UI storage
         EmailResponse res = new EmailResponse();
 
         res.setId(UUID.randomUUID().toString());
         res.setSender("Me");
         res.setSenderEmail("gsanthosh5910@gmail.com");
 
-        List<String> recipientList = Arrays.stream(req.getTo().split(","))
+        List<String> recipients = Arrays.stream(req.getTo().split(","))
                 .map(String::trim)
                 .collect(Collectors.toList());
 
-        res.setRecipients(recipientList);
+        res.setRecipients(recipients);
 
         res.setSubject(req.getSubject());
         res.setBody(req.getBody());
@@ -143,9 +98,6 @@ sender.send(msg);
         return res;
     }
 
-    // ─────────────────────────────
-    // MARK READ
-    // ─────────────────────────────
     public EmailResponse markRead(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -156,9 +108,6 @@ sender.send(msg);
         return null;
     }
 
-    // ─────────────────────────────
-    // STAR
-    // ─────────────────────────────
     public EmailResponse toggleStar(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -169,9 +118,6 @@ sender.send(msg);
         return null;
     }
 
-    // ─────────────────────────────
-    // TRASH
-    // ─────────────────────────────
     public EmailResponse trash(String id) {
         for (EmailResponse e : emails) {
             if (e.getId().equals(id)) {
@@ -182,9 +128,6 @@ sender.send(msg);
         return null;
     }
 
-    // ─────────────────────────────
-    // DELETE
-    // ─────────────────────────────
     public void delete(String id) {
         emails.removeIf(e -> e.getId().equals(id));
     }
