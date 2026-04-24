@@ -44,33 +44,32 @@ public class EmailService {
 
         try {
             // 🔥 FORCE BREVO SMTP (bypass config issues)
-            JavaMailSenderImpl sender = new JavaMailSenderImpl();
-            sender.setHost("smtp-relay.brevo.com");
-            sender.setPort(587);
+JavaMailSenderImpl sender = new JavaMailSenderImpl();
 
-            sender.setUsername(System.getenv("SPRING_MAIL_USERNAME"));
-            sender.setPassword(System.getenv("SPRING_MAIL_PASSWORD"));
+sender.setHost("smtp-relay.brevo.com");
+sender.setPort(587);
+sender.setUsername(System.getenv("SPRING_MAIL_USERNAME"));
+sender.setPassword(System.getenv("SPRING_MAIL_PASSWORD"));
 
-            Properties props = sender.getJavaMailProperties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
+Properties props = sender.getJavaMailProperties();
 
-            MimeMessage msg = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg);
+props.put("mail.transport.protocol", "smtp");
+props.put("mail.smtp.auth", "true");
+props.put("mail.smtp.starttls.enable", "true");
+props.put("mail.smtp.starttls.required", "true");
+props.put("mail.smtp.connectiontimeout", "5000");
+props.put("mail.smtp.timeout", "5000");
+props.put("mail.smtp.writetimeout", "5000");
 
-            helper.setFrom("gsanthosh5910@gmail.com"); // verified sender
-            helper.setReplyTo("gsanthosh5910@gmail.com");
+MimeMessage msg = sender.createMimeMessage();
+MimeMessageHelper helper = new MimeMessageHelper(msg);
 
-            String[] recipients = Arrays.stream(req.getTo().split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .toArray(String[]::new);
+helper.setFrom("gsanthosh5910@gmail.com");
+helper.setTo(req.getTo().split(","));
+helper.setSubject(req.getSubject());
+helper.setText(req.getBody());
 
-            helper.setTo(recipients);
-            helper.setSubject(req.getSubject() != null ? req.getSubject() : "Test");
-            helper.setText(req.getBody() != null ? req.getBody() : "");
-
-            sender.send(msg);
+sender.send(msg);
 
         } catch (Exception e) {
             e.printStackTrace();
