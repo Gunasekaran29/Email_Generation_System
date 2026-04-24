@@ -54,30 +54,23 @@ public class EmailService {
                 .toArray(String[]::new);
 
         // 🔥 SEND REAL EMAIL (BREVO)
-        try {
-            MimeMessage msg = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+      try {
+    MimeMessage msg = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(msg);
 
-            // ⚠️ MUST MATCH BREVO VERIFIED SENDER
-            helper.setFrom("gsanthosh5910@gmail.com");
-            helper.setReplyTo("gsanthosh5910@gmail.com");
+    helper.setFrom("gsanthosh5910@gmail.com");   // verified sender in Brevo
+    helper.setReplyTo("gsanthosh5910@gmail.com");
 
-            helper.setTo(recipients);
-            helper.setSubject(
-                    req.getSubject() != null ? req.getSubject() : "(No Subject)"
-            );
+    helper.setTo(req.getTo().split(","));
+    helper.setSubject(req.getSubject() != null ? req.getSubject() : "Test");
+    helper.setText(req.getBody() != null ? req.getBody() : "");
 
-            helper.setText(
-                    req.getBody() != null ? req.getBody() : "",
-                    true
-            );
+    mailSender.send(msg);
 
-            mailSender.send(msg);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("SMTP failed: " + e.getMessage());
-        }
+} catch (Exception e) {
+    e.printStackTrace(); // IMPORTANT
+    throw new RuntimeException("SMTP failed: " + e.getMessage());
+}
 
         // ✅ STORE IN MEMORY (for UI)
         EmailResponse res = new EmailResponse();
