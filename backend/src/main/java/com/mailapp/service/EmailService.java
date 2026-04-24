@@ -3,8 +3,7 @@ package com.mailapp.service;
 import com.mailapp.dto.EmailResponse;
 import com.mailapp.dto.SendEmailRequest;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +12,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
-
-    // 🔥 In-memory storage (temporary)
+    // 🔥 TEMP in-memory storage
     private final List<EmailResponse> emails = new ArrayList<>();
 
     // ─────────────────────────────
@@ -38,48 +34,58 @@ public class EmailService {
     }
 
     // ─────────────────────────────
-    // SEND EMAIL (REAL SMTP)
+    // SEND EMAIL (FORCED BREVO)
     // ─────────────────────────────
     public EmailResponse send(SendEmailRequest req) {
 
-        // ✅ VALIDATE INPUT
         if (req.getTo() == null || req.getTo().isBlank()) {
-            throw new RuntimeException("Recipient email is required");
+            throw new RuntimeException("Recipient required");
         }
 
-        // ✅ PREPARE RECIPIENTS
-        String[] recipients = Arrays.stream(req.getTo().split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toArray(String[]::new);
+        try {
+            // 🔥 FORCE BREVO SMTP (bypass config issues)
+            JavaMailSenderImpl sender = new JavaMailSenderImpl();
+            sender.setHost("smtp-relay.brevo.com");
+            sender.setPort(587);
 
-        // 🔥 SEND REAL EMAIL (BREVO)
-      try {
-    MimeMessage msg = mailSender.createMimeMessage();
-    MimeMessageHelper helper = new MimeMessageHelper(msg);
+            sender.setUsername(System.getenv("SPRING_MAIL_USERNAME"));
+            sender.setPassword(System.getenv("SPRING_MAIL_PASSWORD"));
 
-    helper.setFrom("gsanthosh5910@gmail.com");   // verified sender in Brevo
-    helper.setReplyTo("gsanthosh5910@gmail.com");
+            Properties props = sender.getJavaMailProperties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
 
-    helper.setTo(req.getTo().split(","));
-    helper.setSubject(req.getSubject() != null ? req.getSubject() : "Test");
-    helper.setText(req.getBody() != null ? req.getBody() : "");
+            MimeMessage msg = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(msg);
 
-    mailSender.send(msg);
+            helper.setFrom("gsanthosh5910@gmail.com"); // verified sender
+            helper.setReplyTo("gsanthosh5910@gmail.com");
 
-} catch (Exception e) {
-    e.printStackTrace(); // IMPORTANT
-    throw new RuntimeException("SMTP failed: " + e.getMessage());
-}
+            String[] recipients = Arrays.stream(req.getTo().split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
 
-        // ✅ STORE IN MEMORY (for UI)
+            helper.setTo(recipients);
+            helper.setSubject(req.getSubject() != null ? req.getSubject() : "Test");
+            helper.setText(req.getBody() != null ? req.getBody() : "");
+
+            sender.send(msg);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("SMTP failed: " + e.getMessage());
+        }
+
+        // ✅ STORE FOR UI
         EmailResponse res = new EmailResponse();
 
         res.setId(UUID.randomUUID().toString());
         res.setSender("Me");
         res.setSenderEmail("gsanthosh5910@gmail.com");
 
-        List<String> recipientList = Arrays.stream(recipients)
+        List<String> recipientList = Arrays.stream(req.getTo().split(","))
+                .map(String::trim)
                 .collect(Collectors.toList());
 
         res.setRecipients(recipientList);
@@ -102,7 +108,7 @@ public class EmailService {
     }
 
     // ─────────────────────────────
-    // MARK AS READ
+    // MARK READ
     // ─────────────────────────────
     public EmailResponse markRead(String id) {
         for (EmailResponse e : emails) {
@@ -115,7 +121,7 @@ public class EmailService {
     }
 
     // ─────────────────────────────
-    // TOGGLE STAR
+    // STAR
     // ─────────────────────────────
     public EmailResponse toggleStar(String id) {
         for (EmailResponse e : emails) {
@@ -128,7 +134,7 @@ public class EmailService {
     }
 
     // ─────────────────────────────
-    // MOVE TO TRASH
+    // TRASH
     // ─────────────────────────────
     public EmailResponse trash(String id) {
         for (EmailResponse e : emails) {
