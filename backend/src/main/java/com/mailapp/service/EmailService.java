@@ -60,6 +60,7 @@ public class EmailService {
 
             // ⚠️ MUST MATCH BREVO VERIFIED SENDER
             helper.setFrom("gsanthosh5910@gmail.com");
+            helper.setReplyTo("gsanthosh5910@gmail.com");
 
             helper.setTo(recipients);
             helper.setSubject(
