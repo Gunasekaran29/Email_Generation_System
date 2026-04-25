@@ -24,13 +24,15 @@ public class EmailController {
         return "OK";
     }
 
-    @GetMapping
-    public ResponseEntity<List<EmailResponse>> list(
-            @RequestParam(required = false) String status) {
+@GetMapping
+public List<Email> getAll(@RequestParam(required = false) String status) {
 
-        if (status != null) return ResponseEntity.ok(svc.getByStatus(status));
-        return ResponseEntity.ok(svc.getAll());
+    if (status != null) {
+        return svc.getByStatus(status);
     }
+
+    return svc.getAll();
+}
     @PatchMapping("/{id}/read")
 public ResponseEntity<EmailResponse> markRead(@PathVariable String id) {
     return ResponseEntity.ok(svc.markRead(id));

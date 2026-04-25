@@ -21,23 +21,17 @@ public class EmailService {
         this.repo = repo;
     }
 
-    // ─────────────────────────────
     // GET ALL
-    // ─────────────────────────────
     public List<Email> getAll() {
         return repo.findAll();
     }
 
-    // ─────────────────────────────
-    // FILTER BY STATUS
-    // ─────────────────────────────
+    // FILTER
     public List<Email> getByStatus(String status) {
         return repo.findByStatus(status);
     }
 
-    // ─────────────────────────────
-    // SEND EMAIL (BREVO API)
-    // ─────────────────────────────
+    // SEND MAIL
     public Email send(SendEmailRequest req) {
 
         if (req.getTo() == null || req.getTo().isBlank()) {
@@ -82,9 +76,7 @@ public class EmailService {
             throw new RuntimeException("Email send failed: " + e.getMessage());
         }
 
-        // ─────────────────────────────
-        // SAVE ONLY SENT MAIL
-        // ─────────────────────────────
+        // SAVE SENT MAIL ONLY
         Email sent = new Email();
 
         sent.setSender("Me");
@@ -105,9 +97,7 @@ public class EmailService {
         return repo.save(sent);
     }
 
-    // ─────────────────────────────
-    // MARK AS READ
-    // ─────────────────────────────
+    // MARK READ
     public Email markRead(String id) {
         return repo.findById(id).map(e -> {
             e.setRead(true);
@@ -115,9 +105,7 @@ public class EmailService {
         }).orElse(null);
     }
 
-    // ─────────────────────────────
-    // TOGGLE STAR
-    // ─────────────────────────────
+    // STAR
     public Email toggleStar(String id) {
         return repo.findById(id).map(e -> {
             e.setStarred(!e.isStarred());
@@ -125,9 +113,7 @@ public class EmailService {
         }).orElse(null);
     }
 
-    // ─────────────────────────────
-    // MOVE TO TRASH
-    // ─────────────────────────────
+    // TRASH
     public Email trash(String id) {
         return repo.findById(id).map(e -> {
             e.setStatus("trash");
@@ -135,9 +121,7 @@ public class EmailService {
         }).orElse(null);
     }
 
-    // ─────────────────────────────
     // DELETE
-    // ─────────────────────────────
     public void delete(String id) {
         repo.deleteById(id);
     }
