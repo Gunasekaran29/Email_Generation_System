@@ -92,7 +92,7 @@ public class EmailService {
         sent.setRead(true);
         sent.setStarred(false);
         sent.setAvatar("");
-        sent.setCreatedAt(LocalDateTime.now().toString());
+        sent.setCreatedAt(LocalDateTime.now());
 
         return repo.save(sent);
     }
